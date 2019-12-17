@@ -1,0 +1,8 @@
+testing6 <- data.frame(ID=c("12324","14536","1146","00928","12324","12324"),
+                       Year=c("2013","2013","2013","2014","2015","2016"))
+
+testing6$Repeats <- with(testing6, ave(ID, ID, FUN = seq_along)) - 1
+
+testing6$Repeats <- 0L
+i <- which(duplicated(testing6$ID))
+testing6$Repeats[i] <- with(testing6[i, ], unsplit(lapply(split(ID, ID), seq_along), ID))
