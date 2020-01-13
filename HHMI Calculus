@@ -1,0 +1,716 @@
+####### June 14th. 
+
+library(gridExtra)
+library(ggplot2)
+library(psych)
+library(plyr)
+library(reshape)
+library(car)
+library(plotrix)
+library(rowr)
+library(dplyr)
+library(fmsb)
+library(plotly)
+library(scales)
+library(tidyr)
+
+read.csv("/Users/luisvalderrama/Desktop/HHMI Research/R_MAC2311_GRADES.csv")
+read.csv("/Users/luisvalderrama/Desktop/HHMI Research/R_MAC2311_GRADES.csv")
+
+MACDATA <- read.csv("/Users/luisvalderrama/Desktop/HHMI Research/R_MAC2311_GRADES.csv")
+
+ls(MACDATA) ####Shows variables of data (Lists objects)
+nrow(MACDATA) ###### number of rows
+ncol(MACDATA) #### number of columns
+table(MACDATA$Sex)
+
+####SUMMARY FOR SAT SCORES
+
+  ### CREATING VARIABLE
+is.na(MACDATA$Max.Score) <- !MACDATA$Max.Score#### to rid 0 and convert them to NA
+MACDATA$Max.Score_NA <- MACDATA$Max.Score
+table(MACDATA$Max.Score_NA)  #### TO Check 0 were deleted
+
+hist(MACDATA$Max.Score_NA) #### makes histogram of Data
+hist(MACDATA$Max.Score_NA, breaks=100) #### Breaks the data
+hist(MACDATA$Max.Score_NA, breaks=100, main="SAT Scores in MAC2311 Fall 11 to Spring 16", col = "cornflowerblue", col.main = "blue", xlab = "SAT Score", ylab = "# of Students") #### Changes main title, col adds color to bar, col.main adds color to main title. 
+title(main = "SAT Scores in MAC2311 Fall 11 to Spring 16") ### adds new main tittle plus the default title.
+
+
+### Descriptive Statistics ##
+summary(MACDATA$Max.Score_NA)
+
+read.csv("/Users/luisvalderrama/Desktop/HHMI Research/term_SAT_MAC2311.csv")
+SATDATA <- read.csv("/Users/luisvalderrama/Desktop/HHMI Research/term_SAT_MAC2311.csv")
+
+
+describeBy(MACDATA$Max.Score_NA, MACDATA$Term, mat = TRUE) ### separated SAT max scores to term and did descr. stat.s
+
+### box plot notice the commands used for edititng boxplot color and text.###
+boxplot1 <- ggplot(MACDATA, aes(x = as.factor(Term), y = Max.Score_NA)) + geom_boxplot(fill="lightgoldenrod1", color="navy") + 
+  labs(title= "SAT Math Scores MAC2311 Fall 11 to Spring 16", x="Semester", y="SAT Math Score") +
+  scale_x_discrete(labels = c("Fall 11", "Spring 12", "Summer 12", "Fall 12", "Spring 13", "Summer 13", "Fall 13", "Spring 14", "Summer 14", "Fall 14", "Spring 15", "Summer 15", "Fall 15", "Spring 16")) +
+  theme(axis.text.x= element_text(colour= "darkblue", angle = 40, size = 12, vjust = 0.6), axis.text.y=element_text(colour = "darkblue", size = 12), title=element_text(colour = "Navy blue", size = 20))
+head(boxplot1)
+boxplot1 + geom_boxplot()
+str(boxplot1)
+grid.arrange(boxplot1, ncol=1)
+print(boxplot1)
+
+### Box plot for HHMI SAT Scores ###
+
+HHMIDATA <- subset(MACDATA, Term=="1158"|Term=="1161")
+table(HHMIDATA$Term)
+HHMIDATA <- subset(HHMIDATA, Instr.ID=="1400541"|Instr.ID=="1400257"|Instr.ID=="1236179"|Instr.ID=="1067440")
+ls(HHMIDATA) ##list##
+table(HHMIDATA$Instr.ID, HHMIDATA$Name.of.Instructor)
+HHMIDATA2 <- subset(HHMIDATA, Term=="1158")
+###TERM: 1158: 1057 real 1056, 1161: 732 real 728
+### Anna Wlodarczyk: 1400541
+### Julian Edward: 1400257
+### Tedi Draghici: 1236179
+### Tom Leness: 1067440
+
+str(HHMIDATA)
+### Box plot SAT Score used subset to only do Fall 15
+boxplot2 <- ggplot(subset(HHMIDATA, Term=="1158"), aes(x = Name.of.Instructor, y = Max.Score_NA)) + geom_boxplot(fill="lightgoldenrod1", color="navy") + 
+  labs(title= "HHMI SAT Math Scores MAC2311 Fall 15", x="Professor", y="SAT Math Score") +
+  theme(axis.text.x= element_text(colour= "darkblue", angle = 40, size = 12, vjust = 0.6), axis.text.y=element_text(colour = "darkblue", size = 12), title=element_text(colour = "Navy blue", size = 20))
+print(boxplot2)
+
+boxplot3 <- ggplot(HHMIDATA2, aes(x = Name.of.Instructor, y = Max.Score_NA)) + geom_boxplot(fill="lightgoldenrod1", color="navy") + geom_boxplot(data= MACDATA1158, aes(x = Name.of.Instructor, y = Max.Score_NA)) +
+  scale_x_discrete(limits= c(levels(HHMIDATA2$Professor), "1158")) + labs(title= "HHMI SAT Math Scores MAC2311 Fall 18", x="Professor", y="SAT Math Score") +
+  theme(axis.text.x= element_text(colour= "darkblue", angle = 40, size = 12, vjust = 0.6), axis.text.y=element_text(colour = "darkblue", size = 12), title=element_text(colour = "Navy blue", size = 20))
+print(boxplot3) ###NOT WORKING
+
+grid.arrange(boxplot2,boxplot3,ncol=2)
+
+MACDATA1158 <- subset(HHMIDATA, Term=="1158")
+
+boxplot3 <- ggplot(HHMIDATA2, aes(x = Name.of.Instructor, y = Max.Score_NA)) + geom_boxplot(data= MACDATA1158, aes(x = Name.of.Instructor, y = Max.Score_NA)) 
+
+
+####  Box plot SAT Score used subset to only do Spring 16
+
+boxplot4 <- ggplot(subset(HHMIDATA, Term=="1161"), aes(x = Name.of.Instructor, y = Max.Score_NA)) + geom_boxplot(fill="lightgoldenrod1", color="navy") + 
+  labs(title= "HHMI SAT Math Scores MAC2311 Spring 16", x="Professor", y="SAT Math Score") +
+  theme(axis.text.x= element_text(colour= "darkblue", angle = 40, size = 12, vjust = 0.6), axis.text.y=element_text(colour = "darkblue", size = 12), title=element_text(colour = "Navy blue", size = 20))
+print(boxplot4)
+
+grid.arrange(boxplot2,boxplot4, ncol=2)
+
+HHMIDATA3 <- subset(HHMIDATA, Term=="1161")
+
+MACDATA1158$allprof <- cut(MACDATA1158$Name.of.Instructor, c("Alireza Rostamian"="All Professors", "Anna Wlodarczyk"="All Professors", "Carmen Shershin"="All Professors", "Chongsheng Cao"="All Professors",
+                                                                 "Enrique Villamor"="All Professors", "Gerardo Aladro"="All Professors", "Idris Mercer"="All Professors", "Julian Edward"="All Professors", "Kai Huang"="All Professors",
+                                                                 "Louis Roder Tcheugouse Teboe"="All Professors", "Maydelin Galvez"="All Professors", "Michael Rosenthal"="All Professors", "Richard Nadel"="All Professors", 
+                                                                 "Robert Storfer"="All Professors", "Solange Kouemou"="All Professors", "Stepan Grigoriev"="All Professors"="All Professors", "Susan Gorman"="All Professors", "Tedi Draghici"="All Professors", 
+                                                                 "Thomas Leness"="All Professors", "Yi Zhi Yang"="All Professors", "Yuanchang Sun"="All Professors", "Zhongming Wang"="All Professors"))
+
+
+MACDATA1158$Name.of.Instructor
+
+head(MACDATA1158$Name.of.Instructor)
+ 
+
+MACDATA2$Name.of.Instructor <- recode(MACDATA2$Name.of.Instructor, ifelse= "All.Instructors")
+
+MACDATA3 <- subset(MACDATA,Term=="1158")
+MACDATA3$Name.of.Instructor <- recode(MACDATA3$Name.of.Instructor, "'Alireza Rostamian'='All Instructors'; else ='All.Instructors'")
+table(MACDATA3$Name.of.Instructor)
+str(MACDATA3)
+
+## Adding all instructors so boxplot can have HHMI professors compared to all instructors
+##
+
+## WORKED ;_;~!!!!!!
+MACDATA3$Name.of.Instructor <- "All Instructors" ## THIS WORKED!!!!!!!!##
+MACDATA1158 <-rbind(HHMIDATA2, MACDATA3, deparse.level = 1, make.row.names = TRUE,
+      stringsAsFactors = default.stringsAsFactors())
+boxplot2 <- ggplot(MACDATA1158, aes(x = Name.of.Instructor, y = Max.Score_NA)) + geom_boxplot(fill="lightgoldenrod1", color="navy") + 
+  labs(title= "HHMI SAT Math Scores MAC2311 Fall 15", x="Professor", y="SAT Math Score") +
+  theme(axis.text.x= element_text(colour= "darkblue", angle = 40, size = 12, vjust = 0.6), axis.text.y=element_text(colour = "darkblue", size = 12), title=element_text(colour = "Navy blue", size = 20))
+print(boxplot2)
+
+MACDATA1159 <-rbind(HHMIDATA2, MACDATA3) ###Can be used also###
+
+plot(MACDATA$Grd.Pt.Unt, MACDATA$Max.Score_NA, main="Scatterplot")
+cor(MACDATA$Grd.Pt.Unt, MACDATA$Max.Score_NA)
+
+MACDATA4 <- subset(MACDATA, Term=="1161")
+MACDATA4$Name.of.Instructor <- "All Instructors"
+MACDATA1161 <-rbind(HHMIDATA3, MACDATA4, deparse.level = 1, make.row.names = TRUE,
+                    stringsAsFactors = default.stringsAsFactors())
+boxplot3 <- ggplot(MACDATA1161, aes(x = Name.of.Instructor, y = Max.Score_NA)) + geom_boxplot(fill="lightgoldenrod1", color="navy") + 
+  labs(title= "HHMI SAT Math Scores MAC2311 Spring 16", x="Professor", y="SAT Math Score") +
+  theme(axis.text.x= element_text(colour= "darkblue", angle = 40, size = 12, vjust = 0.6), axis.text.y=element_text(colour = "darkblue", size = 12), title=element_text(colour = "Navy blue", size = 20))
+print(boxplot3)
+
+#Linear Regression#
+MACDATA
+lm(MACDATA$Grd.Pt.Unt ~ MACDATA$Max.Score_NA + MACDATA$Sex + MACDATA$GPA)
+lm.r = lm(MACDATA$Grd.Pt.Unt ~ MACDATA$Max.Score_NA + MACDATA$Sex + MACDATA$GPA)
+summary(lm.r)
+print(lm.r)
+
+describeBy()
+
+MAC2311_ALEKS_RPT_1118_1161 <- read.csv("/Users/luisvalderrama/Desktop/HHMI Research/MAC2311_ALEKS_RPT_1118_1161.csv")
+is.na(MAC2311_ALEKS_RPT_1118_1161$Max.Score) <- !MAC2311_ALEKS_RPT_1118_1161$Max.Score
+MAC2311_ALEKS_RPT_1118_1161$Max.Score_NA <- MAC2311_ALEKS_RPT_1118_1161$Max.Score
+MAC2311_ALEKS_RPT_1158_1161 <- subset(MAC2311_ALEKS_RPT_1118_1161, Term=="1158"|Term=="1161")
+MAC2311_ALEKS_RPT_1158_1161 <- subset(MAC2311_ALEKS_RPT_1158_1161, Instr.ID="")
+## LM on Aleks and Repeats
+lm(MAC2311_ALEKS_RPT_1118_1161$Grd.Pt.Unt ~  
+     MAC2311_ALEKS_RPT_1118_1161$Max.Score.NA + MAC2311_ALEKS_RPT_1118_1161$Repeated.)
+lm.a = lm(MAC2311_ALEKS_RPT_1118_1161$Grd.Pt.Unt ~  
+            MAC2311_ALEKS_RPT_1118_1161$Max.Score_NA + MAC2311_ALEKS_RPT_1118_1161$Repeated.)
+summary(lm.a)
+### Here again there is a positive correlation with the max SAT score and also a negative correlation with repeated
+### But the r squared value is still <.2.
+
+is.na(MAC2311_ALEKS_RPT_1118_1161$Max.Score) <- !MAC2311_ALEKS_RPT_1118_1161$Max.Score
+MAC2311_ALEKS_RPT_1118_1161$Max.Score_NA <- MAC2311_ALEKS_RPT_1118_1161$Max.Score
+table(MAC2311_ALEKS_RPT_1118_1161$Max.Score_NA)  #### TO Check 0 were deleted
+
+#Tests Grade point control against MAX SAT, SEX, GPA, and REPEATS
+lm.b = lm( Grd.Pt.Unt ~ Max.Score_NA + Sex.NA + GPA + Repeated. + as.factor(Instr.ID) + as.factor(Instr.ID):Max.Score_NA, data=MAC2311_ALEKS_RPT_1118_1161)
+summary(lm.b)
+##-It was seen that when adding other variables, the more they repeat the more they are likely
+##   to pass the course. Although, when repeats are done individually there is a negative correlation. How come?
+##   it is a good model though due to it have an R squared value of.3 (we want >.2 )
+##-The aleks score, since it was not filled for atleast 20% of the students should be rechecked and redone because
+##    it doesnt give a good linear model, (R squared < .2)
+
+#Testing only repeats
+lm.c = lm( Grd.Pt.Unt ~ Repeated., data=MAC2311_ALEKS_RPT_1118_1161)
+summary(lm.c)
+
+##this linear model used repeats as the only variable and although a significant negative correlation was found 
+##  comaring it to the grade obtained the r squared <<< .2 so it is not a good model.
+
+##Testing ALEKS scores with repeats
+lm.d = lm(MAC2311_ALEKS_RPT_1118_1161$Grd.Pt.Unt ~ MAC2311_ALEKS_RPT_1118_1161$Aleks.Score + MAC2311_ALEKS_RPT_1118_1161$Repeated.)
+summary(lm.d)
+## Although a positive correlation is seen with Aleks scores, 7688 observations were deleted due to missing aleks scores. (only ~18% of students have scores). The r squared is also less than 0.2 so it is not a good linear model.
+
+
+#CHANGING U TO NA # this was done to only have a difference between M & F and not any U.
+MAC2311_ALEKS_RPT_1118_1161$Sex.NA <- MAC2311_ALEKS_RPT_1118_1161$Sex
+MAC2311_ALEKS_RPT_1118_1161$Sex.NA[MAC2311_ALEKS_RPT_1118_1161$Sex.NA == "U"] <- NA 
+table(MAC2311_ALEKS_RPT_1118_1161$Sex.NA)
+
+##subsetting MACDATA with Aleks and repeats to then bind diagnostic scores SPRING 16
+MAC2311_1116 <- subset(MAC2311_ALEKS_RPT_1118_1161, Term==1161)
+MAC2311_1116_Diag <- subset(MAC2311_1116, Section=="U03"|Section=="U08"|Section=="RXA"|Section=="U14")
+table(MAC2311_1116$Term, MAC2311_1116$Section)
+
+DIAG <- read.csv("/Users/luisvalderrama/Desktop/HHMI Research/MAC2311 Calc Diag.csv")
+##Adding new varible "ID" to match other dataset
+is.na(DIAG$Student.ID) <- !DIAG$Student.ID
+DIAG$ID <- DIAG$Student.ID
+
+##Binding depending on a variable SPRING 16
+DIAG_1116_MAC2311 <- merge(MAC2311_1116_Diag, DIAG, by="ID", all=T)
+##Gets rid of rows with NA
+DIAG_1116_MAC2311 <- DIAG_1116_MAC2311[-which(is.na(DIAG_1116_MAC2311$Last)),]
+
+##Lm of diagnostic scores SPRING 16
+lm.e = lm(DIAG_1116_MAC2311$Grd.Pt.Unt ~ as.numeric(sub("%", "", DIAG_1116_MAC2311$Total)))
+summary(lm.e)
+
+lm.f = lm(DIAG_1116_MAC2311$Grd.Pt.Unt ~ as.numeric(sub("%", "", DIAG_1116_MAC2311$Exp...Corr.1)) + as.numeric(sub("%", "", DIAG_1116_MAC2311$F.G...Corr.1 )) + as.numeric(sub("%", "", DIAG_1116_MAC2311$Geo...Corr.1 )) + as.numeric(sub("%", "", DIAG_1116_MAC2311$LE.I.Corr)) + as.numeric(sub("%", "", DIAG_1116_MAC2311$L.EF...Corr.1)) + as.numeric(sub("%", "", DIAG_1116_MAC2311$Poly...Corr.1 )) + as.numeric(sub("%", "", DIAG_1116_MAC2311$RE...Corr.1 )) + as.numeric(sub("%", "", DIAG_1116_MAC2311$Trig...Corr.1 )))
+summary(lm.f)
+
+DIAG_1116_MAC2311$Total <- as.numeric(sub("%", "", DIAG_1116_MAC2311$Total))
+table(as.numeric(sub("%", "", DIAG_1116_MAC2311$Total)))
+str(DIAG_1116_MAC2311)
+
+##subsetting MACDATA with Aleks and repeats to then bind diagnostic scores FALL 2015
+MAC2311_1158 <- subset(MAC2311_ALEKS_RPT_1118_1161, Term==1158)
+MAC2311_1158_Diag <- subset(MAC2311_1158, Section=="U21"|Section=="U12"|Section=="U02"|Section=="U06")
+table(MAC2311_1158_Diag$Term, MAC2311_1158_Diag$Section)
+
+Diag1158 <- read.csv("/Users/luisvalderrama/Desktop/HHMI Research/Calc Diag 1158.csv")
+##Binding depending on a variable Fall 2015
+DIAG_1158_MAC2311 <-merge(MAC2311_1158_Diag, Diag1158, by="ID", all=T)
+DIAG_1158_MAC2311 <- DIAG_1158_MAC2311[-which(is.na(DIAG_1158_MAC2311$Last)),]
+DIAG_1158_MAC2311$Total <- (DIAG_1158_MAC2311$Total*100)
+table(DIAG_1158_MAC2311$Total)
+
+#Lm of Dagnostic scores Fall 18
+lm.g = lm(DIAG_1158_MAC2311$Grd.Pt.Unt ~ DIAG_1158_MAC2311$Total)
+summary(lm.g)
+
+DIAG_1158_MAC2311$CD...Corr.1 <- (DIAG_1158_MAC2311$CD...Corr.1*100)
+DIAG_1158_MAC2311$Exp...Corr.1 <- (DIAG_1158_MAC2311$Exp...Corr.1*100)
+DIAG_1158_MAC2311$F.G...Corr.1 <- (DIAG_1158_MAC2311$F.G...Corr.1*100)
+DIAG_1158_MAC2311$Geo...Corr.1 <- (DIAG_1158_MAC2311$Geo...Corr.1*100)
+DIAG_1158_MAC2311$LE.I.Corr <- (DIAG_1158_MAC2311$LE.I.Corr*100)
+DIAG_1158_MAC2311$L.EF...Corr.1 <- (DIAG_1158_MAC2311$L.EF...Corr.1*100)
+DIAG_1158_MAC2311$Poly...Corr.1 <- (DIAG_1158_MAC2311$Poly...Corr.1*100)
+DIAG_1158_MAC2311$RE...Corr.1 <- (DIAG_1158_MAC2311$RE...Corr.1*100)
+DIAG_1158_MAC2311$Trig...Corr.1 <- (DIAG_1158_MAC2311$Trig...Corr.1*100)
+
+
+lm.h = lm( DIAG_1158_MAC2311$Grd.Pt.Unt ~ DIAG_1158_MAC2311$Exp...Corr.1 + DIAG_1158_MAC2311$F.G...Corr.1 + DIAG_1158_MAC2311$Geo...Corr.1 + DIAG_1158_MAC2311$LE.I.Corr + DIAG_1158_MAC2311$L.EF...Corr.1 + DIAG_1158_MAC2311$Poly...Corr.1 + DIAG_1158_MAC2311$RE...Corr.1 + DIAG_1158_MAC2311$Trig...Corr.1)
+summary(lm.h)## NOT SIGNIFICANT##
+
+table(DIAG_1158_MAC2311$Total)
+
+### Adding variable of Scaleup and Traditional
+MACDATA.SCALEUP <- MACDATA
+MACDATA.SCALEUP$Learning <- ifelse(MACDATA.SCALEUP$Term=="1158"&MACDATA.SCALEUP$Instr.ID=="1236179"|MACDATA.SCALEUP$Term=="1158"&MACDATA.SCALEUP$Instr.ID=="1067440"|MACDATA.SCALEUP$Term==1161&MACDATA.SCALEUP$Instr.ID=="1400257"|MACDATA.SCALEUP$Term=="1161"&MACDATA.SCALEUP$Instr.ID=="1236179", "Scale Up", "Traditional")
+table(MACDATA.SCALEUP$Term,MACDATA.SCALEUP$Name.of.Instructor,MACDATA.SCALEUP$Learning)
+
+MACDATA.SCALEUP$Format <- ifelse(MACDATA.SCALEUP$Instr.ID=="1236179"|MACDATA.SCALEUP$Instr.ID=="1067440"|MACDATA.SCALEUP$Instr.ID=="1400257"|MACDATA.SCALEUP$Instr.ID=="1400541"|MACDATA.SCALEUP$Instr.ID=="1093825"|MACDATA.SCALEUP$Instr.ID=="1082721", "HHMI", "N/A")
+
+##boxplot of scale up vs traditional classes
+boxplot.5 <- ggplot(MACDATA.SCALEUP, aes(x = Learning, y= Grd.Pt.Unt)) + geom_boxplot(fill="lightgoldenrod1", color="navy") + 
+  labs(title= "Scale Up Effect on Grade", x="Type of Learning", y="Grade Point Unit Received") +
+  theme(axis.text.x= element_text(colour= "darkblue", angle = 0, size = 12, vjust = 0.6), axis.text.y=element_text(colour = "darkblue", size = 12), title=element_text(colour = "Navy blue", size = 20))
+print(boxplot.5)
+##Created new df of just HHMI professors
+SCALEUP <- subset(MACDATA.SCALEUP, Format=="HHMI")
+
+lm.i <- lm( SCALEUP$Grd.Pt.Unt ~ SCALEUP$Learning)
+summary(lm.i)
+
+SCALEUP.1158.1161 <- subset(SCALEUP, Term=="1158"|Term=="1161")
+lm.j <- lm( SCALEUP.1158.1161$Grd.Pt.Unt ~ SCALEUP.1158.1161$Learning)
+summary(lm.j)
+
+table(MACDATA.SCALEUP_1158_1161$Sex)
+DIAG_1116_MAC2311 <- merge(MAC2311_1116_Diag, DIAG, by="ID", all=T)
+MACDATA.SCALEUP_1158_1161 <- merge(MACDATA.SCALEUP_1158_1161, MAC2311_ALEKS_RPT_1158_1161, by="ID", all=T)
+
+
+### Boxplot for just fall 2015 and spring 2016 ###
+boxplot.6 <- ggplot(MACDATA.SCALEUP_1158_1161, aes(x = Learning, y= Grd.Pt.Unt)) + geom_boxplot(fill="lightgoldenrod1", color="navy") + 
+  labs(title= "Scale Up Effect on Grade 1158 & 1161", x="Type of Learning", y="Grade Point Unit Received") +
+  theme(axis.text.x= element_text(colour= "darkblue", angle = 0, size = 12, vjust = 0.6), axis.text.y=element_text(colour = "darkblue", size = 12), title=element_text(colour = "Navy blue", size = 20))
+print(boxplot.6)
+
+lm.k <- lm(SCALEUP.1158.1161$Grd.Pt.Unt ~ SCALEUP.1158.1161$Max.Score_NA + SCALEUP.1158.1161$Learning )
+summary(lm.k)
+
+lm.l <- lm(SCALEUP.1158.1161$Grd.Pt.Unt ~ SCALEUP.1158.1161$Max.Score_NA + SCALEUP.1158.1161$Sex + SCALEUP.1158.1161$GPA + SCALEUP.1158.1161$Learning)
+summary(lm.l)
+
+MACDATA.SCALEUP_1158_1161 <- subset(MACDATA.SCALEUP, Term=="1158"|Term=="1161")
+
+table(MACDATA.SCALEUP_1158_1161$Grd.Pt.Unt.x, MACDATA.SCALEUP_1158_1161$Learning)
+
+table(SCALEUP.1158.1161$Grd.Pt.Unt, SCALEUP.1158.1161$Learning)
+
+boxplot.7 <- ggplot(MACDATA.SCALEUP_1158_1161, aes(x = Learning, y= Grd.Pt.Unt)) + geom_boxplot(fill="lightgoldenrod1", color="navy") + 
+  labs(title= "Scale Up Effect on Grade 1158 & 1161", x="Type of Learning", y="Grade Point Unit Received") +
+  theme(axis.text.x= element_text(colour= "darkblue", angle = 0, size = 12, vjust = 0.6), axis.text.y=element_text(colour = "darkblue", size = 12), title=element_text(colour = "Navy blue", size = 20))
+print(boxplot.7)
+
+lm.m <- lm(MACDATA.SCALEUP_1158_1161$Grd.Pt.Unt ~ MACDATA.SCALEUP_1158_1161$Max.Score_NA + MACDATA.SCALEUP_1158_1161$Sex + MACDATA.SCALEUP_1158_1161$GPA + MACDATA.SCALEUP_1158_1161$Learning)
+summary(lm.m)
+
+lm.n <- lm(MACDATA.SCALEUP_1158_1161$Grd.Pt.Unt ~ MACDATA.SCALEUP_1158_1161$Max.Score_NA + MACDATA.SCALEUP_1158_1161$Sex + MACDATA.SCALEUP_1158_1161$Learning)
+summary(lm.n)
+
+lm.o <- lm(MACDATA.SCALEUP_1158_1161$Grd.Pt.Unt ~ MACDATA.SCALEUP_1158_1161$Max.Score_NA + MACDATA.SCALEUP_1158_1161$Sex)
+summary(lm.o)
+
+###....### DO BOXPLOT for LEARNING BASED ON ONLY SCALE UP INSTRUCTORS ###...###
+ONLY.SCALEUP <- subset(MACDATA.SCALEUP, Instr.ID=="1236179"|Instr.ID=="1067440"|Instr.ID=="1400257")
+table(ONLY.SCALEUP$Name.of.Instructor)
+table(ONLY.SCALEUP$Sex)
+
+lm.p <- lm(ONLY.SCALEUP$Grd.Pt.Unt ~ ONLY.SCALEUP$Max.Score_NA + ONLY.SCALEUP$Learning)
+summary(lm.p)
+
+lm.q <- lm(ONLY.SCALEUP$Grd.Pt.Unt ~ ONLY.SCALEUP$Max.Score_NA + ONLY.SCALEUP$Sex + ONLY.SCALEUP$Learning)
+summary(lm.q)
+
+boxplot.8 <- ggplot(ONLY.SCALEUP, aes(x = Learning, y= Grd.Pt.Unt)) + geom_boxplot(fill="lightgoldenrod1", color="navy") + 
+  labs(title= "Scale Up Effect on Grade For Scale up Professors", x="Type of Learning", y="Grade Point Unit Received") +
+  theme(axis.text.x= element_text(colour= "darkblue", angle = 0, size = 12, vjust = 0.6), axis.text.y=element_text(colour = "darkblue", size = 12), title=element_text(colour = "Navy blue", size = 20))
+print(boxplot.8)
+
+
+SCALEUP_RPT_1158_1161 <- merge(MACDATA.SCALEUP_1158_1161, MAC2311_ALEKS_RPT_1158_1161, by= c("ID","Term","Section"))
+
+
+TESTING <- data.frame(ID=c('1500582','1500582','1705415','1739532','1826420','2061671','2061671','2061671'))
+TESTING2 <-  data.frame(ID=c('1500582','1705415','1739532','1826420','2061671'))
+TESTING3 <- sum(TESTING$ID==TESTING2$ID, na.rm = T)
+TESTING4 <- data.frame(ID=c('1500582','1500582','1705415','1739532','1826420','2061671','2061671','2061671','1500582','1500582','1705415','1739532','1826420','2061671','2061671','2061671','1500582','1500582','1705415','1739532','1826420','2061671','2061671','2061671'))
+??cbind
+##c bind binds columns together, rbind binds rows together##
+Test3 <- rbind((TESTING),(TESTING2),(TESTING4))
+###
+
+### WESTED DATA ###
+mydata=ldply(list.files(path="/Users/luisvalderrama/Desktop/HHMI Research/WESTED DATA/CSV",pattern="csv",full.names=TRUE),function(filename) {
+  dum=read.csv(filename)
+  dum$filename=filename
+  return(dum)
+})
+
+table(mydata$filename)
+table(mydata$Subject, mydata$Catalog)
+mydata$filename <- NULL ##REMOVES COLUMN "FILENAME"##
+mydata$AND <- NULL ##REMOVES COLUMN "AND"##
+
+write.csv(mydata, file = "/Users/luisvalderrama/Desktop/FIU_STEM_HHMI_File4&5.csv",row.names=FALSE)
+### END OF BINDING ###
+
+
+duplicated(TESTING$ID,incomparables = FALSE)
+
+repeats <- count(TESTING, c("ID"))
+
+TESTING5 <- count(MACDATA.SCALEUP_1158_1161, c(Term=="1158", "ID"))))\
+
+
+testing6 <- data.frame(ID=c("12324","14536","1146","00928","12324","12324"),
+                       Year=c("2013","2013","2013","2014","2015","2016"))
+
+testing6$Repeats <- with(testing6, ave(ID, ID, FUN = seq_along)) - 1
+
+testing6$Repeats <- 0L
+i <- which(duplicated(testing6$ID))
+testing6$Repeats[i] <- with(testing6[i, ], unsplit(lapply(split(ID, ID), seq_along), ID))
+?which
+?duplicated
+?with
+?unsplit
+?lapply
+?split
+?seq_along
+
+MAC2311_ALEKS_RPT_1118_1161$Repeats <- 0L
+i <- which(duplicated(MAC2311_ALEKS_RPT_1118_1161$ID))
+MAC2311_ALEKS_RPT_1118_1161$Repeats[i] <- with(MAC2311_ALEKS_RPT_1118_1161[i, ], unsplit(lapply(split(ID, ID), seq_along), ID))
+MAC2311_ALEKS_RPT_1118_1161$Repeats <- NULL
+
+
+MACTESTINGRPT <- data.frame((MAC2311_ALEKS_RPT_1118_1161$ID),(MAC2311_ALEKS_RPT_1118_1161$Term))
+MACTESTINGRPT$Repeats <- 0L
+i <- which(duplicated(MACTESTINGRPT$X.MAC2311_ALEKS_RPT_1118_1161.ID.))
+MACTESTINGRPT$Repeats[i] <- with(MACTESTINGRPT[i, ], unsplit(lapply(split(X.MAC2311_ALEKS_RPT_1118_1161.ID., X.MAC2311_ALEKS_RPT_1118_1161.ID.), seq_along), X.MAC2311_ALEKS_RPT_1118_1161.ID.))
+
+write.csv(MACTESTINGRPT, file = "/Users/luisvalderrama/Desktop/MACTESTINGRPT.csv",row.names=FALSE)
+
+## TRIG+PRECALC###
+MAC1147 <- read.csv("/Users/luisvalderrama/Desktop/HHMI Research/Pre Reqs/MAC1147_1071-1161_FIU_JD_CRSE_GRADE_DATA_2_476707713-10.csv")
+MAC1147_RPT <- MAC1147[c("ID","Term")] ## adding only specific colums from old dataframe to new dataframe ##
+## testng repeat count 
+MAC1147_RPT$Repeats <- 0L
+i <- which(duplicated(MAC1147_RPT$ID))
+MAC1147_RPT$Repeats[i] <- with(MAC1147_RPT[i, ], unsplit(lapply(split(ID, ID), seq_along), ID))
+
+MAC1147_RPT$T_P.Grd.Pt.Unt <- MAC1147$Grd.Pt.Unt
+names(MAC1147_RPT)[names(MAC1147_RPT)=="Repeats"] <- "Trig.PCal.Rpt"
+names(MAC1147_RPT)[names(MAC1147_RPT)=="Term"] <- "Trig.PCal.Term"
+
+MAC1147_RPT <- MAC1147_RPT[order(MAC1147_RPT$Trig.PCal.Rpt) , ]  ##Keeps most recent repeats wihtout having duplicates##
+MAC1147_RPT <- MAC1147_RPT[!duplicated(MAC1147_RPT$ID, fromLast = TRUE) , ]
+
+
+MAC1147$Repeats <- MAC1147_RPT$Repeats
+
+#COLLEGE ALGEBRA###
+MAC1105 <- read.csv("/Users/luisvalderrama/Desktop/HHMI Research/Pre Reqs/College_Algebra_1071_1161.csv")
+MAC1105_RPT <- MAC1105[c("ID","Term")]
+MAC1105_RPT$Repeats <- 0L
+i <- which(duplicated(MAC1105_RPT$ID))
+MAC1105_RPT$Repeats[i] <- with(MAC1105_RPT[i, ], unsplit(lapply(split(ID, ID), seq_along), ID))
+
+MAC1105_RPT$Grd.Pt.Unt <- MAC1105$Grd.Pt.Unt
+names(MAC1105_RPT)[names(MAC1105_RPT)=="Repeats"] <- "Col.Alg.Rpt"
+names(MAC1105_RPT)[names(MAC1105_RPT)=="Grd.Pt.Unt"] <- "Col.Alg.Grd.Pt.Unt"
+names(MAC1105_RPT)[names(MAC1105_RPT)=="Term"] <- "Col.Alg.Term"
+
+MAC1105_RPT <- MAC1105_RPT[order(MAC1105_RPT$Col.Alg.Rpt),]
+MAC1105_RPT <- MAC1105_RPT[!duplicated(MAC1105_RPT$ID, fromLast = TRUE) , ]
+
+MAC1105$Repeats <- MAC1105_RPT$Repeats
+
+## TRIGONOMETRY ##
+MAC1114 <- read.csv("/Users/luisvalderrama/Desktop/HHMI Research/Pre Reqs/MAC1114_1071-1161_FIU_JD_CRSE_GRADE_DATA_2_476707713-10-4.csv")
+MAC1114_RPT <- MAC1114[c("ID","Term")]
+MAC1114_RPT$Repeats <- 0L
+i <- which(duplicated(MAC1114_RPT$ID))
+MAC1114_RPT$Repeats[i] <- with(MAC1114_RPT[i, ], unsplit(lapply(split(ID, ID), seq_along), ID))
+
+MAC1114_RPT$Trig.Grd.Pt.Unt <- MAC1114$Grd.Pt.Unt
+names(MAC1114_RPT)[names(MAC1114_RPT)=="Repeats"] <- "Trig.Rpt"
+names(MAC1114_RPT)[names(MAC1114_RPT)=="Term"] <- "Trig.Term"
+
+MAC1114_RPT <- MAC1114_RPT[order(MAC1114_RPT$Trig.Rpt),]
+MAC1114_RPT <- MAC1114_RPT[!duplicated(MAC1114_RPT$ID, fromLast = TRUE) , ]
+
+
+MAC1114$Repeats <- MAC1114_RPT$Repeats
+
+### PRECALC ##
+MAC1140 <- read.csv("/Users/luisvalderrama/Desktop/HHMI Research/Pre Reqs/MAC1140_1071-1161_FIU_JD_CRSE_GRADE_DATA_2_476707713-10.csv")
+MAC1140_RPT <- MAC1140[c("ID","Term")]
+MAC1140_RPT$Repeats <- 0L
+i <- which(duplicated(MAC1140_RPT$ID))
+MAC1140_RPT$Repeats[i] <- with(MAC1140_RPT[i, ], unsplit(lapply(split(ID, ID), seq_along), ID))
+
+MAC1140_RPT$PCal.Grd.Pt.Unt <- MAC1140$Grd.Pt.Unt
+names(MAC1140_RPT)[names(MAC1140_RPT)=="Repeats"] <- "PCal.Rpt"
+names(MAC1140_RPT)[names(MAC1140_RPT)=="Term"] <- "PCal.Term"
+
+MAC1140_RPT <- MAC1140_RPT[order(MAC1140_RPT$PCal.Rpt),]
+MAC1140_RPT <- MAC1140_RPT[!duplicated(MAC1140_RPT$ID, fromLast = TRUE) , ]
+
+
+MAC1140$Repeats <- MAC1140_RPT$Repeats
+
+## STATS 1 ##
+STATS1 <- read.csv("/Users/luisvalderrama/Desktop/HHMI Research/Pre Reqs/STA3111_1118-1161_FIU_JD_CRSE_GRADE_DATA_2_476707713-9.csv")
+STATS1_RPT <- STATS1[c("ID","Term")]
+STATS1_RPT$Repeats <- 0L
+i <- which(duplicated(STATS1_RPT$ID))
+STATS1_RPT$Repeats[i] <- with(STATS1_RPT[i, ], unsplit(lapply(split(ID, ID), seq_along), ID))
+
+STATS1_RPT$STATS1.Grd.Pt.Unt <- STATS1$Grd.Pt.Unt
+names(STATS1_RPT)[names(STATS1_RPT)=="Trig.PCal.Rpt"] <- "STATS1.Rpt"
+names(STATS1_RPT)[names(STATS1_RPT)=="Trig.PCal.Term"] <- "STATS1.Term"
+
+STATS1_RPT <- STATS1_RPT[order(STATS1_RPT$STATS1.Rpt) , ]  ##Keeps most recent repeats wihtout having duplicates##
+STATS1_RPT <- STATS1_RPT[!duplicated(STATS1_RPT$ID, fromLast = TRUE) , ]
+
+STATS1$Repeats <- STATS1_RPT$Repeats
+
+## STATS 2 ##
+STATS2 <- read.csv("/Users/luisvalderrama/Desktop/HHMI Research/Pre Reqs/STA3112_1118-1161_FIU_JD_CRSE_GRADE_DATA_2_476707713-9-2.csv")
+STATS2_RPT <- STATS2[c("ID","Term")]
+STATS2_RPT$Repeats <- 0L
+i <- which(duplicated(STATS2_RPT$ID))
+STATS2_RPT$Repeats[i] <- with(STATS2_RPT[i, ], unsplit(lapply(split(ID, ID), seq_along), ID))
+
+STATS2_RPT$STATS2.Grd.Pt.Unt <- STATS2$Grd.Pt.Unt
+names(STATS2_RPT)[names(STATS2_RPT)=="Repeats"] <- "STATS2.Rpt"
+names(STATS2_RPT)[names(STATS2_RPT)=="Term"] <- "STATS2.Term"
+
+STATS2_RPT <- STATS2_RPT[order(STATS2_RPT$STATS2.Rpt) , ]  ##Keeps most recent repeats wihtout having duplicates##
+STATS2_RPT <- STATS2_RPT[!duplicated(STATS2_RPT$ID, fromLast = TRUE) , ]
+
+STATS2$Repeats <- STATS2_RPT$Repeats
+
+## CALC 2 ##
+CALC2 <- read.csv("/Users/luisvalderrama/Desktop/HHMI Research/Pre Reqs/MAC2312_1118-1161_FIU_JD_CRSE_GRADE_DATA_2_476707713-9.csv")
+CALC2_RPT <- CALC2[c("ID","Term")]
+CALC2_RPT$Repeats <- 0L
+i <- which(duplicated(CALC2_RPT$ID))
+CALC2_RPT$Repeats[i] <- with(CALC2_RPT[i, ], unsplit(lapply(split(ID, ID), seq_along), ID))
+
+CALC2_RPT$CALC2.Grd.Pt.Unt <- CALC2$Grd.Pt.Unt
+names(CALC2_RPT)[names(CALC2_RPT)=="Repeats"] <- "CALC2.Rpt"
+names(CALC2_RPT)[names(CALC2_RPT)=="Term"] <- "CALC2.Term"
+
+CALC2_RPT <- CALC2_RPT[order(CALC2_RPT$CALC2.Rpt) , ]  ##Keeps most recent repeats wihtout having duplicates##
+CALC2_RPT <- CALC2_RPT[!duplicated(CALC2_RPT$ID, fromLast = TRUE) , ]
+
+
+CALC2$Repeats <- CALC2_RPT[c("Repeats")]
+
+## Merging Pre reqs into MAC2311_Aleks_rpt
+ALL_CLASSES <- merge(MAC1105_RPT, MAC1114_RPT, all=TRUE)
+ALL_CLASSES <- merge(ALL_CLASSES, MAC1140_RPT, all=TRUE)
+ALL_CLASSES <- merge(ALL_CLASSES, MAC1147_RPT, all=TRUE)
+ALL_CLASSES <- merge(ALL_CLASSES, STATS1_RPT, all=TRUE)
+ALL_CLASSES <- merge(ALL_CLASSES, STATS2_RPT, all=TRUE)
+ALL_CLASSES <- merge(ALL_CLASSES, CALC2_RPT, all=TRUE)
+
+ALL_PRECLASSES <- merge(MAC2311_ALEKS_RPT_1118_1161,ALL_CLASSES, by="ID", all.x=TRUE)
+
+##linear model for previous classes##
+
+TrigPCalc <- merge(MAC1140_RPT, MAC1114_RPT, all=TRUE)
+TrigPCalc <- merge(TrigPCalc, MAC1147_RPT, all=TRUE)
+TrigPCalc$PCal.Term <-NULL
+TrigPCalc$PCal.Rpt <- NULL
+TrigPCalc$Trig.Term <- NULL
+TrigPCalc$Trig.Rpt <- NULL
+TrigPCalc$Trig.PCal.Term <- NULL
+TrigPCalc$Trig.PCal.Rpt <- NULL
+# One way to do it##
+TrigPCalc[-1] <- lapply(TrigPCalc[-1], function(x) as.numeric(as.character(x)))
+TrigPCalc$Avg.Trig.PCal <-  rowMeans(TrigPCalc[-1], na.rm=TRUE)
+TrigPCalc$Avg
+
+ALL_PRECLASSES <- join(ALL_PRECLASSES, TrigPCalc, type="left")
+ALL_PRECLASSES$Avg.Trig.PCal <- NULL
+## Second way to do it
+TrigPCalc$Avg.Trig.Pcalc <- with(TrigPCalc, ifelse(is.na(Trig.Grd.Pt.Unt) | is.na(PCal.Grd.Pt.Unt), T_P.Grd.Pt.Unt, (Trig.Grd.Pt.Unt + PCal.Grd.Pt.Unt) / 2))
+table(TrigPCalc$T_P.Grd.Pt.Unt, useNA = "ifany")
+table(TrigPCalc$Trig.Grd.Pt.Unt, useNA= "ifany")
+table(TrigPCalc$PCal.Grd.Pt.Unt, useNA = "ifany")
+
+TrigPCalc$Avg <- 0L
+TrigPCalc$Trig_Pcal.Grd.Unt <- with(TrigPCalc, ifelse(!is.na(T_P.Grd.Pt.Unt), T_P.Grd.Pt.Unt, 
+                                        ifelse(!is.na(Trig.Grd.Pt.Unt)&!is.na(PCal.Grd.Pt.Unt), ((Trig.Grd.Pt.Unt+PCal.Grd.Pt.Unt)/2),
+                                               ifelse(!is.na(Trig.Grd.Pt.Unt), Trig.Grd.Pt.Unt, 
+                                                      ifelse(!is.na(PCal.Grd.Pt.Unt), PCal.Grd.Pt.Unt, "NA")))))
+table(TrigPCalc$Avg, useNA = "ifany")
+                                
+TrigPCalc$Avg2 <- with(TrigPCalc, ifelse(is.na(Trig.Grd.Pt.Unt)&is.na(PCal.Grd.Pt.Unt)&is.na(T_P.Grd.Pt.Unt), "yes","no"))
+                                        
+TrigPCalc$PCal.Grd.Pt.Unt <- NULL
+TrigPCalc$Trig.Grd.Pt.Unt <- NULL
+TrigPCalc$T_P.Grd.Pt.Unt <- NULL
+TrigPCalc$Avg.Trig.Pcalc <- NULL
+TrigPCalc$Avg <- NULL
+TrigPCalc$Trig_r <- NULL
+TrigPCalc$PCalc_r <- NULL
+TrigPCalc$TriPCal_r <- NULL
+TrigPCalc$Avg1 <- NULL
+TrigPCalc$Avg2 <- NULL
+
+ALL_PRECLASSES <- merge(ALL_PRECLASSES, TrigPCalc, by="ID", all.x=TRUE)
+
+write.csv(ALL_PRECLASSES, file = "/Users/luisvalderrama/Desktop/OVERALLMAC2311.csv",row.names=FALSE)
+
+
+##THINGS TO DO linear models on MAC2311 ##
+
+lm.s <- lm(ALL_PRECLASSES$Grd.Pt.Unt ~ ALL_PRECLASSES$Max.Score_NA)
+
+table(ALL_PRECLASSES$Trig_Pcal.Grd.Unt,  useNA = "ifany")
+
+#Max.Score_NA 2496 missing
+#Trig_Pcal.Grd.Unt 4750 missing
++ 
+  lm.s <- lm(ALL_PRECLASSES$Grd.Pt.Unt ~ ALL_PRECLASSES$Col.Alg.Grd.Pt.Unt) 
+ lm.s <- lm(ALL_PRECLASSES$Grd.Pt.Unt ~ as.numeric(ALL_PRECLASSES$Trig_Pcal.Grd.Unt))
+ lm.s <- lm(ALL_PRECLASSES$Grd.Pt.Unt ~ ALL_PRECLASSES$STATS1.Grd.Pt.Unt)
+ lm.s <- lm(ALL_PRECLASSES$Grd.Pt.Unt ~ ALL_PRECLASSES$STATS2.Grd.Pt.Unt)
+ lm.s <- lm(ALL_PRECLASSES$Grd.Pt.Unt ~ ALL_PRECLASSES$CALC2.Grd.Pt.Unt)
+summary(lm.s)
+
+
+str(ALL_PRECLASSES)
+
+FinalF15 <- read.csv("/Users/luisvalderrama/Desktop/HHMI Research/Pre Reqs/FINAL FALL 2015 Question.csv")
+
+#Spider web#
+radarchart(FinalF15, axistype = 1, pcol=rgb(0, 0.5, 0.8) , pfcol=rgb(0.2,0.5,0.8,0.5), plwd=4 , cglcol="gold", cglty = 1, axislabcol="black", cglwd = 0.8, vlcex = 0.8, title = "MAC2311 Fall 15 Final Question Averages")
+
+##Transposing FinalF15# IGNORE HAD TO DO IT IN EXCEL 
+#Wasn't working due to the min and max not being on the df
+SW.FinalF15t = data.frame(lo=c("0"),Q1=c("44.60"),Q2=c("52.81"),Q3=c("51.12"),Q4=c("64.30"),Q5=c("45.01"),Q6=c("31.98"),Q7=c("58.01"),Q8=c("40.92"),Q9=c("69.65"),Q10=c("56.59"),Q11=c("42.59"),Q12=c("50.54"),AVERAGE=c("53.55"))
+SW.FinalF15t= rbind(rep(100,13),rep(0,13), SW.FinalF15t[i,-1])
+SW.FinalF15t <- t(SW.FinalF15t[,2:ncol(SW.FinalF15t)])
+SW.FinalF15t <- cbind("0"= 0, SW.FinalF15t)
+######
+
+## how to summarize ##
+##barplot###
+ggplot(FinalF15bp, aes(x=Question, y=Average)) + geom_bar(stat= "identity", fill="lightgoldenrod1", color="navy") + 
+  labs(title= "MAC2311 Fall 15 Final Question Averages") + scale_y_continuous(limits = c(0,100)) +
+  theme(axis.text.x= element_text(colour= "darkblue", angle = 0, size = 12, vjust = 0.6), axis.text.y=element_text(colour = "darkblue", size = 12), title=element_text(colour = "Navy blue", size = 20))
+
+#### to summarise the data ###
+m <- ddply(HHMI, ".", summarise, mean = mean(Q02.12.1, na.rm=TRUE), 
+           count1 = sum(Q02.12.1==1, na.rm=TRUE),
+           count2 = sum(Q02.12.1==2, na.rm=TRUE), 
+           count3 = sum(Q02.12.1==3, na.rm=TRUE),
+           count4 = sum(Q02.12.1==4, na.rm=TRUE),
+           count5 = sum(Q02.12.1==5, na.rm=TRUE))
+m$total <- with(m, (count1+count2+count3+count4+count5))
+m$perc1 <- (m$count1/m$total)*100
+m$perc2 <- (m$count2/m$total)*100
+m$perc3 <- (m$count3/m$total)*100
+m$perc4 <- (m$count4/m$total)*100
+m$perc5 <- (m$count5/m$total)*100
+####
+
+
+TL.Final.15 <- read.csv("/Users/luisvalderrama/Desktop/TL-FINAL 15.csv")
+TL.Final.15.Letters <- subset(TL.Final.15, select = c("X5a.Lt", "X5b.Lt", "X5c.Lt"))
+names(TL.Final.15.Letters)[names(TL.Final.15.Letters)=="X5a.Lt"] <- "5a Letter"
+names(TL.Final.15.Letters)[names(TL.Final.15.Letters)=="X5b.Lt"] <- "5b Letter"
+names(TL.Final.15.Letters)[names(TL.Final.15.Letters)=="X5c.Lt"] <- "5c Letter"
+
+table(TL.Final.15.Letters$`5a Letter`)
+m <- ddply(TL.Final.15.Letters, .(), summarise, aA = sum(`5a Letter` =="A", na.rm=TRUE),
+           aB = sum(`5a Letter` == "B", na.rm=TRUE),
+           aC = sum(`5a Letter` =="C", na.rm=TRUE),
+           aD = sum(`5a Letter` =="D", na.rm=TRUE),
+           aE = sum(`5a Letter` =="E", na.rm=TRUE),
+           countall = aA+aB+aC+aD+aE)
+m$.id <- NULL
+m$countall <- NULL
+###diagnostic df##
+m.d <- data.frame(aA="12",aB="7",aC="12",aD="6",aE="3")
+m=rbind(rep(35,5) , rep(0,5) , m)
+m=rbind(m, m.d)
+m <- as.data.frame(sapply(m, as.numeric))
+rownames(m) <- c("1","2","Final","Diag.")
+m
+str(m)
+radarchart(m)
+colors_border=c( rgb(0.2,0.5,0.9,0.9), rgb(0.4,0.7,0.1,0.9) )
+colors_in=c( rgb(0.2,0.5,0.9,0.2), rgb(0.4,0.7,0.1,0.2) )
+radarchart( m  , axistype=1 , 
+            #custom polygon
+            pcol=colors_border , pfcol=colors_in , plwd=4 , plty=1,
+            #custom the grid
+            cglcol="grey", cglty=1, axislabcol="grey", caxislabels=seq(0,20,5), cglwd=0.8,
+            #custom labels
+            vlcex=0.8 , title = "T.Leness Performance on Common Diagnostic Question 5a")
+legend(x=0.7, y=1, legend = rownames(m[-c(1,2),]), bty = "n", pch=20 , col=colors_in , text.col = "grey", cex=1.2, pt.cex=3)
+
+
+
+n <- ddply(TL.Final.15.Letters, .(), summarise,
+           bA = sum(`5b Letter` =="A", na.rm=TRUE),
+           bB = sum(`5b Letter` == "B", na.rm=TRUE),
+           bC = sum(`5b Letter` =="C", na.rm=TRUE),
+           bD = sum(`5b Letter` =="D", na.rm=TRUE),
+           bE = sum(`5b Letter` =="E", na.rm=TRUE))
+n$.id <- NULL
+n.d <- data_frame(bA="18",bB="8",bC="7",bD="2",bE="5")
+n=rbind(rep(35,5) , rep(0,5) , n)
+n=rbind(n, n.d)
+n <- as.data.frame(sapply(n, as.numeric))
+rownames(n) <- c("1","2","Final","Diag.")
+radarchart(n)
+colors_border=c( rgb(0.2,0.5,0.9,0.9), rgb(0.4,0.7,0.1,0.9) )
+colors_in=c( rgb(0.2,0.5,0.9,0.2), rgb(0.4,0.7,0.1,0.2) )
+radarchart( n  , axistype=1 , 
+            #custom polygon
+            pcol=colors_border , pfcol=colors_in , plwd=4 , plty=1,
+            #custom the grid
+            cglcol="grey", cglty=1, axislabcol="grey", caxislabels=seq(0,20,5), cglwd=0.8,
+            #custom labels
+            vlcex=0.8 , title = "T.Leness Performance on Common Diagnostic Question 5b")
+legend(x=0.7, y=1, legend = rownames(n[-c(1,2),]), bty = "n", pch=20 , col=colors_in , text.col = "grey", cex=1.2, pt.cex=3)
+
+
+
+o <- ddply(TL.Final.15.Letters, .(), summarise,
+           cA = sum(`5c Letter` =="A", na.rm=TRUE),
+           cB = sum(`5c Letter` == "B", na.rm=TRUE),
+           cC = sum(`5c Letter` =="C", na.rm=TRUE),
+           cD = sum(`5c Letter` =="D", na.rm=TRUE),
+           cE = sum(`5c Letter` =="E", na.rm=TRUE))
+o$.id <- NULL
+o.d <- data_frame(cA="3",cB="8",cC="15",cD="5",cE="8")
+o=rbind(rep(35,5) , rep(0,5) , o)
+o=rbind(o, o.d)
+o <- as.data.frame(sapply(o, as.numeric))
+rownames(o) <- c("1","2","Final","Diag.")
+radarchart(o)
+colors_border=c( rgb(0.2,0.5,0.9,0.9), rgb(0.4,0.7,0.1,0.9) )
+colors_in=c( rgb(0.2,0.5,0.9,0.2), rgb(0.4,0.7,0.1,0.2) )
+radarchart( o  , axistype=1 , 
+            #custom polygon
+            pcol=colors_border , pfcol=colors_in , plwd=4 , plty=1,
+            #custom the grid
+            cglcol="grey", cglty=1, axislabcol="grey", caxislabels=seq(0,20,5), cglwd=0.8,
+            #custom labels
+            vlcex=0.8 , title = "T.Leness Performance on Common Diagnostic Question 5c")
+legend(x=0.7, y=1, legend = rownames(o[-c(1,2),]), bty = "n", pch=20 , col=colors_in , text.col = "grey", cex=1.2, pt.cex=3)
